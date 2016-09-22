@@ -5,15 +5,18 @@
  * @author William C. Garrison
  * @version 4.5
  */
-public final class ArrayBag<T> implements BagInterface<T> {
 
-    private final T[] bag;
+import java.util.Arrays;
+
+public class ArrayBag<T> implements BagInterface<T> {
+
+    private  T[] bag;
     private int numberOfEntries;
     private boolean initialized = false;
-    private static final int DEFAULT_CAPACITY = 5;
+    private static final int DEFAULT_CAPACITY = 3;
     private static final int MAX_CAPACITY = 10000;
 
-    /** Creates an empty bag whose initial capacity is 25. */
+    /** Creates an empty bag whose initial capacity is 3. */
     public ArrayBag() {
         this(DEFAULT_CAPACITY);
     }
@@ -39,17 +42,53 @@ public final class ArrayBag<T> implements BagInterface<T> {
      *  @return  True if the addition is successful, or false if not. */
     public boolean add(T newEntry) {
         checkInitialization();
-        boolean result = true;
         if (isArrayFull()) {
-            result = false;
-        } else {
+            //result = false;
+			doubleCapacity();
+        } 
             // Assertion: result is true here
-            bag[numberOfEntries] = newEntry;
-            numberOfEntries++;
-        }
+        bag[numberOfEntries] = newEntry;
+        numberOfEntries++;
+        
 
-        return result;
+        return true;//now add always return true
     }
+
+	private void doubleCapacity() {
+		int newLength = 2 * bag.length;
+		checkCapacity(newLength);
+		bag = Arrays.copyOf(bag, 2 * bag.length);
+	}
+	
+	private void checkCapacity(int capacity) {
+		if(capacity > MAX_CAPACITY) {
+			throw new IllegalStateException("Attempt to create a bag whose" +
+				"capacity exceeds the maximum of " + MAX_CAPACITY);
+
+		}
+	}
+
+    public boolean addAll(T[] newEntries) {
+           checkInitialization();
+
+           // Determine the new number of items
+           int newSize = numberOfEntries + newEntries.length;
+           // If there is not enough capacity for this number
+           if (newSize > bag.length) {
+               // New capacity is double, unless double isn't big enough
+               int newCapacity = Math.max(newSize, bag.length*2);
+               checkCapacity(newCapacity);
+               bag = Arrays.copyOf(bag, newCapacity);
+           }
+
+           // Now, add all items
+           for (T entry : newEntries) {
+               bag[numberOfEntries++] = entry;
+           }
+
+           return true;
+       }
+
 
     /** Retrieves all entries that are in this bag.
      *  @return  A newly allocated array of all the entries in this bag. */
